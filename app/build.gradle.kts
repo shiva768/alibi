@@ -15,6 +15,17 @@ android {
         versionName = "1.0"
     }
 
+    // CI で app/debug.keystore が置かれたときだけ固定鍵で署名(上書きインストール用)
+    val debugKeystore = file("debug.keystore")
+    if (debugKeystore.exists()) {
+        signingConfigs.getByName("debug") {
+            storeFile = debugKeystore
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
