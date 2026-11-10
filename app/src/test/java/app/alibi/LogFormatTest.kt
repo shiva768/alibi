@@ -18,9 +18,11 @@ class LogFormatTest {
         )
     }
 
-    @Test fun monthFile_usesJst() {
+    @Test fun dayFile_usesJst() {
         // 2026-10-31T15:30:00Z = 2026-11-01 00:30 JST
-        assertEquals("usage-events-202611.jsonl", LogFormat.monthFileName(1793460600000L))
+        assertEquals("usage-events-20261101.jsonl", LogFormat.dayFileName(1793460600000L))
+        // 2026-10-31T14:59:59Z = 2026-10-31 23:59:59 JST
+        assertEquals("usage-events-20261031.jsonl", LogFormat.dayFileName(1793458799000L))
     }
 
     @Test fun dedupPrune_keepsOnlyOverlapWindow() {

@@ -43,12 +43,12 @@ object Collector {
                 if (e.packageName !in targets) continue
                 val key = LogFormat.dedupKey(e.packageName, e.timeStamp, name)
                 if (!seen.add(key)) continue
-                byFile.getOrPut(LogFormat.monthFileName(e.timeStamp)) { mutableListOf() }
+                byFile.getOrPut(LogFormat.dayFileName(e.timeStamp)) { mutableListOf() }
                     .add(LogFormat.eventLine(e.timeStamp, e.packageName, name))
                 count++
             }
             // heartbeat: 「now までは欠落なく記録できている」保証
-            byFile.getOrPut(LogFormat.monthFileName(now)) { mutableListOf() }
+            byFile.getOrPut(LogFormat.dayFileName(now)) { mutableListOf() }
                 .add(LogFormat.heartbeatLine(coverageUntilMs = now, generatedAtMs = System.currentTimeMillis()))
 
             JsonlWriter(context, folder).append(byFile)
