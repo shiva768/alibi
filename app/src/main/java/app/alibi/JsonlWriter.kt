@@ -17,10 +17,34 @@ class JsonlWriter(private val context: Context, private val treeUri: Uri) {
             // MIME を octet-stream にしないと ".txt" が付与され月別ファイル名が崩れる
             val file = dir.findFile(name) ?: dir.createFile("application/octet-stream", name)
                 ?: throw IllegalStateException("$name を作成できません")
-            val text = lines.joinToString(separator = "\n", postfix = "\n")
-            val out = context.contentResolver.openOutputStream(file.uri, "wa")
-                ?: throw IllegalStateException("$name を開けません")
-            out.use { it.write(text.toByteArray(Charsets.UTF_8)) }
+            val text = lines.joinToString(separator = "\n", postfix = "\n").toByteArray(Charsets.UTF_8)
+            appendBytes(file.uri, name, text)
+        }
+    }
+
+    /**
+     * まず追記モード("wa")で開く。Google Drive など追記非対応のプロバイダでは
+     * 開く段階で失敗するので、既存内容を読んで連結し、全体を書き戻す。
+     */
+    private fun appendBytes(uri: Uri, name: String, add: ByteArray) {
+        val resolver = context.contentResolver
+        val appendOut = try {
+            resolver.openOutputStream(uri, "wa")
+        } catch (e: Exception) {
+            null // Unsupported mode 等 → フォールバック
+        }
+        if (appendOut != null) {
+            appendOut.use { it.write(add) }
+            return
+        }
+        // 読めないまま "w" で書くと既存ログを消すので、読み出し失敗時は中止する
+        val existing = resolver.openInputStream(uri)?.use { it.readBytes() }
+            ?: throw IllegalStateException("$name を読み出せません")
+        val out = resolver.openOutputStream(uri, "w")
+            ?: throw IllegalStateException("$name を開けません")
+        out.use {
+            it.write(existing)
+            it.write(add)
         }
     }
 }
