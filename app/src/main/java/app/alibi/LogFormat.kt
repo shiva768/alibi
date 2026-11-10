@@ -19,10 +19,10 @@ object LogFormat {
     fun heartbeatLine(coverageUntilMs: Long, generatedAtMs: Long): String =
         """{"type":"heartbeat","coverage_until":"${iso(coverageUntilMs)}","generated_at":"${iso(generatedAtMs)}"}"""
 
-    /** usage-events-YYYYMM.jsonl (JST 基準の月別) */
-    fun monthFileName(epochMs: Long): String {
+    /** usage-events-YYYYMMDD.jsonl (JST 基準の日別) */
+    fun dayFileName(epochMs: Long): String {
         val d = Instant.ofEpochMilli(epochMs).atZone(JST)
-        return "usage-events-%04d%02d.jsonl".format(d.year, d.monthValue)
+        return "usage-events-%04d%02d%02d.jsonl".format(d.year, d.monthValue, d.dayOfMonth)
     }
 
     fun dedupKey(pkg: String, epochMs: Long, event: String) = "$pkg|$epochMs|$event"
