@@ -15,10 +15,14 @@ class CollectWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ct
     companion object {
         private const val NAME = "alibi-collect"
 
+        // 3時間間隔。イベントは UsageStats から後追い回収できるので履歴は欠落しない。
+        // UPDATE にしてあるので、旧版(15分)の登録済みスケジュールもこの間隔に置き換わる
+        private const val INTERVAL_HOURS = 3L
+
         fun schedule(context: Context) {
-            val req = PeriodicWorkRequestBuilder<CollectWorker>(15, TimeUnit.MINUTES).build()
+            val req = PeriodicWorkRequestBuilder<CollectWorker>(INTERVAL_HOURS, TimeUnit.HOURS).build()
             WorkManager.getInstance(context)
-                .enqueueUniquePeriodicWork(NAME, ExistingPeriodicWorkPolicy.KEEP, req)
+                .enqueueUniquePeriodicWork(NAME, ExistingPeriodicWorkPolicy.UPDATE, req)
         }
 
         fun runNow(context: Context) {

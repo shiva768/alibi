@@ -5,7 +5,7 @@
 照合そのものは照合側(Muse)の担当で、本アプリはログを書くところまで。
 
 - 出力: `usage-events-YYYYMMDD.jsonl`(JST 日別)。各収集で `heartbeat`(`coverage_until`)を追記
-- 収集: WorkManager 15分周期。`watermark − 5分` から読み直し、`(pkg, ts, event)` で重複排除。書き込み成功時のみ watermark を進める
+- 収集: WorkManager 3時間周期。`watermark − 5分` から読み直し、`(pkg, ts, event)` で重複排除。書き込み成功時のみ watermark を進める
 - 権限: 使用状況へのアクセス(`PACKAGE_USAGE_STATS`)と、対象アプリを選ぶ一覧用の `QUERY_ALL_PACKAGES`。Foreground Service なし
 - 初回収集は「実行時点」から(過去分はさかのぼらない)
 - 記録するのは選んだアプリのイベントだけ(全アプリの履歴は残さない)
