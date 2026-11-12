@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         button("使用状況へのアクセスを開く") { startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)) }
         button("対象アプリを選ぶ") { pickApps() }
         button("出力フォルダを選ぶ") { pickFolder.launch(prefs.folderUri) }
+        button("収集間隔を選ぶ") { pickInterval() }
         button("今すぐ収集") {
             Thread {
                 Collector.run(applicationContext)
@@ -85,6 +86,21 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun pickInterval() {
+        val options = Intervals.OPTIONS_MIN
+        AlertDialog.Builder(this)
+            .setTitle("収集間隔")
+            .setMessage("間隔を空けるほど省電力ですが、照合側が「未確定」で待つ時間も長くなります。実際の実行は省電力機能で多少遅れることがあります。")
+            .setSingleChoiceItems(options.map(Intervals::label).toTypedArray(), options.indexOf(prefs.intervalMinutes)) { dialog, i ->
+                prefs.intervalMinutes = options[i]
+                CollectWorker.schedule(this)
+                refresh()
+                dialog.dismiss()
+            }
+            .setNegativeButton("キャンセル", null)
+            .show()
+    }
+
     private fun refresh() {
         val fmt = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
         fun t(ms: Long) = if (ms == 0L) "未収集" else fmt.format(Date(ms))
@@ -98,6 +114,7 @@ class MainActivity : AppCompatActivity() {
             appendLine("出力フォルダ: " + (prefs.folderUri?.let { Uri.decode(it.toString()) } ?: "未設定"))
             appendLine("対象アプリ:")
             if (prefs.targets.isEmpty()) appendLine("  (未選択)") else prefs.targets.sorted().forEach { appendLine("  ・" + label(it)) }
+            appendLine("収集間隔: " + Intervals.label(prefs.intervalMinutes))
             appendLine("最終収集時刻: " + t(prefs.lastCollectAt))
             appendLine("coverage_until: " + t(prefs.coverageUntil))
             prefs.lastError?.let { appendLine("直近のエラー: $it") }

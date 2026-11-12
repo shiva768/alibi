@@ -1,6 +1,7 @@
 package app.alibi
 
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class LogFormatTest {
@@ -30,5 +31,12 @@ class LogFormatTest {
         val keep = LogFormat.dedupKey("p", wm - 60_000, "resumed")
         val drop = LogFormat.dedupKey("p", wm - Dedup.OVERLAP_MS - 1, "paused")
         assertEquals(setOf(keep), Dedup.prune(setOf(keep, drop), wm))
+    }
+
+    @Test fun intervals_defaultIsOption_andAtLeast15min() {
+        assertTrue(Intervals.DEFAULT_MIN in Intervals.OPTIONS_MIN)
+        assertTrue(Intervals.OPTIONS_MIN.all { it >= 15 })
+        assertEquals("3時間", Intervals.label(180))
+        assertEquals("15分", Intervals.label(15))
     }
 }
