@@ -48,6 +48,11 @@ class MainActivity : AppCompatActivity() {
         button("対象アプリを選ぶ") { pickApps() }
         button("出力フォルダを選ぶ") { pickFolder.launch(prefs.folderUri) }
         button("収集間隔を選ぶ") { pickInterval() }
+        // AlertDialog は message と選択リストを併用できないため、注意書きは画面側に置く
+        root.addView(TextView(this).apply {
+            text = "※間隔を空けるほど省電力ですが、照合側が「未確定」で待つ時間も長くなります。実際の実行は省電力機能で多少遅れることがあります。"
+            textSize = 12f
+        })
         button("今すぐ収集") {
             Thread {
                 Collector.run(applicationContext)
@@ -90,7 +95,6 @@ class MainActivity : AppCompatActivity() {
         val options = Intervals.OPTIONS_MIN
         AlertDialog.Builder(this)
             .setTitle("収集間隔")
-            .setMessage("間隔を空けるほど省電力ですが、照合側が「未確定」で待つ時間も長くなります。実際の実行は省電力機能で多少遅れることがあります。")
             .setSingleChoiceItems(options.map(Intervals::label).toTypedArray(), options.indexOf(prefs.intervalMinutes)) { dialog, i ->
                 prefs.intervalMinutes = options[i]
                 CollectWorker.schedule(this)
