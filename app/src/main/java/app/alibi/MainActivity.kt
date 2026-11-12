@@ -113,7 +113,20 @@ class MainActivity : AppCompatActivity() {
             "${pm.getApplicationLabel(pm.getApplicationInfo(pkg, 0))} ($pkg)"
         } catch (e: Exception) { pkg }
 
+        val missing = buildList {
+            if (!Permission.hasUsageAccess(this@MainActivity)) add("使用状況へのアクセスを許可")
+            if (prefs.targets.isEmpty()) add("対象アプリを選ぶ")
+            if (prefs.folderUri == null) add("出力フォルダを選ぶ")
+            if (prefs.lastCollectAt == 0L) add("「今すぐ収集」を1回成功させる")
+        }
         status.text = buildString {
+            if (missing.isEmpty()) {
+                appendLine("【セットアップ完了】")
+            } else {
+                appendLine("【初回セットアップ未完了】すべて済ませるまで収集は動きません。初回の収集に成功した時点から記録が始まります(それ以前の履歴はさかのぼりません)。")
+                missing.forEachIndexed { i, m -> appendLine("  ${i + 1}. $m") }
+            }
+            appendLine()
             appendLine("権限(使用状況へのアクセス): " + if (Permission.hasUsageAccess(this@MainActivity)) "許可済み" else "未許可")
             appendLine("出力フォルダ: " + (prefs.folderUri?.let { Uri.decode(it.toString()) } ?: "未設定"))
             appendLine("対象アプリ:")
