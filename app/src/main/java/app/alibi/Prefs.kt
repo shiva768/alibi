@@ -24,6 +24,12 @@ class Prefs(context: Context) {
         get() = sp.getStringSet("recentKeys", emptySet()) ?: emptySet()
         set(v) = sp.edit().putStringSet("recentKeys", v.toSet()).apply()
 
+    /** 収集間隔(分)。選択肢は [Intervals.OPTIONS_MIN] のみ。 */
+    var intervalMinutes: Int
+        get() = sp.getInt("intervalMinutes", Intervals.DEFAULT_MIN).takeIf { it in Intervals.OPTIONS_MIN }
+            ?: Intervals.DEFAULT_MIN
+        set(v) = sp.edit().putInt("intervalMinutes", v).apply()
+
     var lastCollectAt: Long
         get() = sp.getLong("lastCollectAt", 0L)
         set(v) = sp.edit().putLong("lastCollectAt", v).apply()
@@ -35,4 +41,12 @@ class Prefs(context: Context) {
     var lastError: String?
         get() = sp.getString("lastError", null)
         set(v) = sp.edit().putString("lastError", v).apply()
+}
+
+/** 収集間隔の選択肢。WorkManager の定期実行は最短15分。 */
+object Intervals {
+    val OPTIONS_MIN = listOf(15, 30, 60, 180, 360, 720)
+    const val DEFAULT_MIN = 180
+
+    fun label(min: Int): String = if (min % 60 == 0) "${min / 60}時間" else "${min}分"
 }

@@ -5,7 +5,7 @@
 照合そのものは照合側(Muse)の担当で、本アプリはログを書くところまで。
 
 - 出力: `usage-events-YYYYMMDD.jsonl`(JST 日別)。各収集で `heartbeat`(`coverage_until`)を追記
-- 収集: WorkManager 3時間周期。`watermark − 5分` から読み直し、`(pkg, ts, event)` で重複排除。書き込み成功時のみ watermark を進める
+- 収集: WorkManager 定期実行(既定3時間。画面から 15分/30分/1時間/3時間/6時間/12時間 に変更可。WorkManager の最短は15分)。`watermark − 5分` から読み直し、`(pkg, ts, event)` で重複排除。書き込み成功時のみ watermark を進める
 - 権限: 使用状況へのアクセス(`PACKAGE_USAGE_STATS`)と、対象アプリを選ぶ一覧用の `QUERY_ALL_PACKAGES`。Foreground Service なし
 - 初回収集は「実行時点」から(過去分はさかのぼらない)
 - 記録するのは選んだアプリのイベントだけ(全アプリの履歴は残さない)
@@ -28,7 +28,7 @@ Drive 上のファイルは、書き込み中の通信断で壊れる可能性�
      設定 → アプリ → Alibi → 右上「⋮」→「制限付き設定を許可」→ 再度許可
 3. 「対象アプリを選ぶ」(SBI証券 / SBI証券 Plus など)
 4. 「出力フォルダを選ぶ」(例: Google Drive 内の `usage-log` フォルダ)
-5. 「今すぐ収集」で動作確認(画面の「直近のエラー」が空で、最終収集時刻と `coverage_until` が更新されること)
+5. 「今すぐ収集」で動作確認。**初回は 2〜5 をすべて済ませて収集を1回成功させるまで記録は始まらない**(画面上部に未完了の項目を表示)。成功後は、更新インストールをまたいで履歴を後追いで拾える(画面の「直近のエラー」が空で、最終収集時刻と `coverage_until` が更新されること)
 
 ## CI
 `.github/workflows/build-apk.yml`: ユニットテスト + debug APK のビルド + artifact のアップロード(7日保持)。
